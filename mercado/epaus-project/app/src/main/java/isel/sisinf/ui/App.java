@@ -23,6 +23,10 @@ SOFTWARE.
 */
 package isel.sisinf.ui;
 
+import isel.sisinf.jpa.Dal;
+import isel.sisinf.model.Cliente;
+
+import java.util.List;
 import java.util.Scanner;
 import java.util.HashMap;
 
@@ -177,32 +181,111 @@ class UI implements AutoCloseable
     }
 
     private void createClient() {
-        // TODO
-        System.out.println("createClient()");
+        Scanner s = getScanner();
+        try (Dal dal = new Dal()) {
+            System.out.print("NIF: ");
+            String nif = readRequiredLine(s);
+            System.out.print("Cartao de cidadao: ");
+            String citizenCard = readRequiredLine(s);
+            System.out.print("Nome: ");
+            String name = readRequiredLine(s);
+            System.out.print("Tipo de contacto (email/telefone): ");
+            String contactType = readRequiredLine(s);
+            System.out.print("Contacto: ");
+            String contact = readRequiredLine(s);
+            System.out.print("Descricao do contacto: ");
+            String description = readRequiredLine(s);
+
+            dal.createClientWithContact(nif, citizenCard, name, contactType, contact, description);
+            System.out.println("Cliente criado com sucesso.");
+        } catch (Exception ex) {
+            System.out.println("Erro ao criar cliente: " + ex.getMessage());
+        }
     }
   
     private void createPortfolio()
     {
-        // TODO
-        System.out.println("createPortfolio()");
+        Scanner s = getScanner();
+        try (Dal dal = new Dal()) {
+            System.out.print("NIF do cliente: ");
+            String nif = readRequiredLine(s);
+            System.out.print("Nome do portefolio: ");
+            String name = readRequiredLine(s);
+
+            dal.createPortfolio(nif, name);
+            System.out.println("Portefolio criado com sucesso.");
+        } catch (Exception ex) {
+            System.out.println("Erro ao criar portefolio: " + ex.getMessage());
+        }
     }
 
     private void listPositions()
     {
-        // TODO
-        System.out.println("listPositions()");
+        Scanner s = getScanner();
+        try (Dal dal = new Dal()) {
+            System.out.print("NIF do cliente: ");
+            String nif = readRequiredLine(s);
+            List<Dal.PositionRow> positions = dal.listPositionsByClient(nif);
+
+            if (positions.isEmpty()) {
+                System.out.println("Nao existem posicoes para o cliente indicado.");
+                return;
+            }
+
+            long currentPortfolio = -1;
+            for (Dal.PositionRow row : positions) {
+                if (row.portfolioId() != currentPortfolio) {
+                    currentPortfolio = row.portfolioId();
+                    System.out.printf("%nPortefolio %d - %s | Total: %.2f%n",
+                            row.portfolioId(), row.portfolioName(), row.portfolioTotal());
+                    System.out.println("ISIN         | Quantidade | Valor actual | Valor posicao | Var. diaria");
+                }
+                System.out.printf("%-12s | %10.4f | %12.2f | %13.2f | %10.2f%%%n",
+                        row.isin(), row.quantity(), row.currentValue(), row.positionTotal(),
+                        row.dailyVariationPercent());
+            }
+        } catch (Exception ex) {
+            System.out.println("Erro ao listar posicoes: " + ex.getMessage());
+        }
 
     }
 
     private void updateInvestments() {
-        // TODO
-        System.out.println("updateInvestments()");
+        try (Dal dal = new Dal()) {
+            dal.updateDailyValues();
+            System.out.println("Valores diarios actualizados com sucesso.");
+        } catch (Exception ex) {
+            System.out.println("Erro ao actualizar valores diarios: " + ex.getMessage());
+        }
     }
 
     private void updateClient()
     {
-        // TODO
-        System.out.println("parkScooter()");
+        Scanner s = getScanner();
+        try (Dal dal = new Dal()) {
+            System.out.print("NIF do cliente: ");
+            String nif = readRequiredLine(s);
+            Cliente cliente = dal.findClient(nif);
+            if (cliente == null) {
+                System.out.println("Cliente inexistente.");
+                return;
+            }
+
+            System.out.printf("Nome actual [%s]: ", cliente.getNome());
+            String name = readOptionalLine(s);
+            System.out.printf("Cartao de cidadao actual [%s]: ", cliente.getCartaoCidadao());
+            String citizenCard = readOptionalLine(s);
+
+            dal.updateClient(
+                    nif,
+                    citizenCard.isBlank() ? cliente.getCartaoCidadao() : citizenCard,
+                    name.isBlank() ? cliente.getNome() : name);
+            System.out.println("Cliente actualizado com sucesso.");
+        } catch (IllegalStateException ex) {
+            System.out.println(ex.getMessage());
+        } catch (Exception ex) {
+            System.out.println("Erro ao actualizar cliente: " + ex.getMessage());
+        }
         
     }
 
@@ -213,6 +296,18 @@ class UI implements AutoCloseable
         System.out.println("DAL version:"+ isel.sisinf.jpa.Dal.version());
         System.out.println("Core version:"+ isel.sisinf.model.Core.version());
         
+    }
+
+    private String readRequiredLine(Scanner scanner) {
+        String value = scanner.nextLine();
+        while (value.isEmpty()) {
+            value = scanner.nextLine();
+        }
+        return value.trim();
+    }
+
+    private String readOptionalLine(Scanner scanner) {
+        return scanner.nextLine().trim();
     }
 }
 
