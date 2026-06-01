@@ -1,62 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="isel.sisinf.AppTest" time="0.01" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="isel.sisinf.AppTest" time="0.03" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
-    <property name="sun.jnu.encoding" value="UTF-8"/>
-    <property name="java.class.path" value="/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/app/target/test-classes:/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/app/target/classes:/Users/datia/.m2/repository/junit/junit/4.13.1/junit-4.13.1.jar:/Users/datia/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/dal/target/dal-1.0-SNAPSHOT.jar:/Users/datia/.m2/repository/org/eclipse/persistence/eclipselink/4.0.9/eclipselink-4.0.9.jar:/Users/datia/.m2/repository/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar:/Users/datia/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.4/jakarta.xml.bind-api-4.0.4.jar:/Users/datia/.m2/repository/com/sun/xml/bind/jaxb-xjc/4.0.6/jaxb-xjc-4.0.6.jar:/Users/datia/.m2/repository/com/sun/xml/bind/jaxb-core/4.0.6/jaxb-core-4.0.6.jar:/Users/datia/.m2/repository/org/eclipse/angus/angus-activation/2.0.3/angus-activation-2.0.3.jar:/Users/datia/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.4/jakarta.activation-api-2.1.4.jar:/Users/datia/.m2/repository/org/postgresql/postgresql/42.7.11/postgresql-42.7.11.jar:/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/model/target/model-1.0-SNAPSHOT.jar:"/>
-    <property name="java.vm.vendor" value="Eclipse Adoptium"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="Cp1252"/>
+    <property name="java.class.path" value="C:\Users\ferra\Desktop\si_2526sv\mercado\epaus-project\app\target\test-classes;C:\Users\ferra\Desktop\si_2526sv\mercado\epaus-project\app\target\classes;C:\Users\ferra\.m2\repository\junit\junit\4.13.1\junit-4.13.1.jar;C:\Users\ferra\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\ferra\Desktop\si_2526sv\mercado\epaus-project\dal\target\dal-1.0-SNAPSHOT.jar;C:\Users\ferra\.m2\repository\org\eclipse\persistence\eclipselink\4.0.9\eclipselink-4.0.9.jar;C:\Users\ferra\.m2\repository\jakarta\xml\bind\jakarta.xml.bind-api\4.0.4\jakarta.xml.bind-api-4.0.4.jar;C:\Users\ferra\.m2\repository\com\sun\xml\bind\jaxb-xjc\4.0.6\jaxb-xjc-4.0.6.jar;C:\Users\ferra\.m2\repository\com\sun\xml\bind\jaxb-core\4.0.6\jaxb-core-4.0.6.jar;C:\Users\ferra\.m2\repository\org\eclipse\angus\angus-activation\2.0.3\angus-activation-2.0.3.jar;C:\Users\ferra\.m2\repository\jakarta\activation\jakarta.activation-api\2.1.4\jakarta.activation-api-2.1.4.jar;C:\Users\ferra\.m2\repository\org\postgresql\postgresql\42.7.11\postgresql-42.7.11.jar;C:\Users\ferra\Desktop\si_2526sv\mercado\epaus-project\model\target\model-1.0-SNAPSHOT.jar;C:\Users\ferra\.m2\repository\jakarta\persistence\jakarta.persistence-api\3.1.0\jakarta.persistence-api-3.1.0.jar;"/>
+    <property name="java.vm.vendor" value="Amazon.com Inc."/>
     <property name="sun.arch.data.model" value="64"/>
-    <property name="java.vendor.url" value="https://adoptium.net/"/>
-    <property name="os.name" value="Mac OS X"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://aws.amazon.com/corretto/"/>
+    <property name="user.timezone" value="Europe/Lisbon"/>
+    <property name="os.name" value="Windows 11"/>
     <property name="java.vm.specification.version" value="21"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="PT"/>
-    <property name="sun.boot.library.path" value="/Users/datia/.sdkman/candidates/java/21.0.6-tem/lib"/>
-    <property name="sun.java.command" value="/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/app/target/surefire/surefirebooter-20260512182045343_9.jar /Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/app/target/surefire 2026-05-12T18-20-44_665-jvmRun1 surefire-20260512182045343_7tmp surefire_2-20260512182045343_8tmp"/>
-    <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="sun.boot.library.path" value="C:\Users\ferra\.jdks\corretto-21.0.4\bin"/>
+    <property name="sun.java.command" value="C:\Users\ferra\AppData\Local\Temp\surefire12545359095051406792\surefirebooter-20260601224835550_9.jar C:\Users\ferra\AppData\Local\Temp\surefire12545359095051406792 2026-06-01T22-48-33_207-jvmRun1 surefire-20260601224835550_7tmp surefire_2-20260601224835550_8tmp"/>
     <property name="jdk.debug" value="release"/>
-    <property name="surefire.test.class.path" value="/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/app/target/test-classes:/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/app/target/classes:/Users/datia/.m2/repository/junit/junit/4.13.1/junit-4.13.1.jar:/Users/datia/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/dal/target/dal-1.0-SNAPSHOT.jar:/Users/datia/.m2/repository/org/eclipse/persistence/eclipselink/4.0.9/eclipselink-4.0.9.jar:/Users/datia/.m2/repository/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar:/Users/datia/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.4/jakarta.xml.bind-api-4.0.4.jar:/Users/datia/.m2/repository/com/sun/xml/bind/jaxb-xjc/4.0.6/jaxb-xjc-4.0.6.jar:/Users/datia/.m2/repository/com/sun/xml/bind/jaxb-core/4.0.6/jaxb-core-4.0.6.jar:/Users/datia/.m2/repository/org/eclipse/angus/angus-activation/2.0.3/angus-activation-2.0.3.jar:/Users/datia/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.4/jakarta.activation-api-2.1.4.jar:/Users/datia/.m2/repository/org/postgresql/postgresql/42.7.11/postgresql-42.7.11.jar:/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/model/target/model-1.0-SNAPSHOT.jar:"/>
+    <property name="surefire.test.class.path" value="C:\Users\ferra\Desktop\si_2526sv\mercado\epaus-project\app\target\test-classes;C:\Users\ferra\Desktop\si_2526sv\mercado\epaus-project\app\target\classes;C:\Users\ferra\.m2\repository\junit\junit\4.13.1\junit-4.13.1.jar;C:\Users\ferra\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\ferra\Desktop\si_2526sv\mercado\epaus-project\dal\target\dal-1.0-SNAPSHOT.jar;C:\Users\ferra\.m2\repository\org\eclipse\persistence\eclipselink\4.0.9\eclipselink-4.0.9.jar;C:\Users\ferra\.m2\repository\jakarta\xml\bind\jakarta.xml.bind-api\4.0.4\jakarta.xml.bind-api-4.0.4.jar;C:\Users\ferra\.m2\repository\com\sun\xml\bind\jaxb-xjc\4.0.6\jaxb-xjc-4.0.6.jar;C:\Users\ferra\.m2\repository\com\sun\xml\bind\jaxb-core\4.0.6\jaxb-core-4.0.6.jar;C:\Users\ferra\.m2\repository\org\eclipse\angus\angus-activation\2.0.3\angus-activation-2.0.3.jar;C:\Users\ferra\.m2\repository\jakarta\activation\jakarta.activation-api\2.1.4\jakarta.activation-api-2.1.4.jar;C:\Users\ferra\.m2\repository\org\postgresql\postgresql\42.7.11\postgresql-42.7.11.jar;C:\Users\ferra\Desktop\si_2526sv\mercado\epaus-project\model\target\model-1.0-SNAPSHOT.jar;C:\Users\ferra\.m2\repository\jakarta\persistence\jakarta.persistence-api\3.1.0\jakarta.persistence-api-3.1.0.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
-    <property name="user.home" value="/Users/datia"/>
-    <property name="user.language" value="en"/>
+    <property name="user.home" value="C:\Users\ferra"/>
+    <property name="user.language" value="pt"/>
     <property name="java.specification.vendor" value="Oracle Corporation"/>
-    <property name="java.version.date" value="2025-01-21"/>
-    <property name="java.home" value="/Users/datia/.sdkman/candidates/java/21.0.6-tem"/>
-    <property name="file.separator" value="/"/>
-    <property name="basedir" value="/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/app"/>
+    <property name="java.version.date" value="2024-07-16"/>
+    <property name="java.home" value="C:\Users\ferra\.jdks\corretto-21.0.4"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="C:\Users\ferra\Desktop\si_2526sv\mercado\epaus-project\app"/>
     <property name="java.vm.compressedOopsMode" value="Zero based"/>
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="apple.awt.application.name" value="ForkedBooter"/>
-    <property name="surefire.real.class.path" value="/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/app/target/surefire/surefirebooter-20260512182045343_9.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\ferra\AppData\Local\Temp\surefire12545359095051406792\surefirebooter-20260601224835550_9.jar"/>
+    <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
-    <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
-    <property name="java.runtime.version" value="21.0.6+7-LTS"/>
-    <property name="user.name" value="datia"/>
-    <property name="stdout.encoding" value="UTF-8"/>
-    <property name="path.separator" value=":"/>
-    <property name="os.version" value="26.3.1"/>
+    <property name="java.runtime.version" value="21.0.4+7-LTS"/>
+    <property name="user.name" value="ferra"/>
+    <property name="stdout.encoding" value="Cp1252"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
     <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
     <property name="file.encoding" value="UTF-8"/>
     <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
-    <property name="java.vendor.version" value="Temurin-21.0.6+7"/>
-    <property name="localRepository" value="/Users/datia/.m2/repository"/>
-    <property name="java.vendor.url.bug" value="https://github.com/adoptium/adoptium-support/issues"/>
-    <property name="java.io.tmpdir" value="/var/folders/kq/x0wrrjfx6jbcf551r5lfqfgm0000gn/T/"/>
-    <property name="java.version" value="21.0.6"/>
-    <property name="user.dir" value="/Users/datia/Data/Clouds/PersonalDrive/Isel/Aulas/SisInf/2025-2026/06-project/mercado/epaus-project/app"/>
-    <property name="os.arch" value="aarch64"/>
+    <property name="java.vendor.version" value="Corretto-21.0.4.7.1"/>
+    <property name="localRepository" value="C:\Users\ferra\.m2\repository"/>
+    <property name="java.vendor.url.bug" value="https://github.com/corretto/corretto-21/issues/"/>
+    <property name="java.io.tmpdir" value="C:\Users\ferra\AppData\Local\Temp\"/>
+    <property name="java.version" value="21.0.4"/>
+    <property name="user.dir" value="C:\Users\ferra\Desktop\si_2526sv\mercado\epaus-project\app"/>
+    <property name="os.arch" value="amd64"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-    <property name="native.encoding" value="UTF-8"/>
-    <property name="java.library.path" value="/Users/datia/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="native.encoding" value="Cp1252"/>
+    <property name="java.library.path" value="C:\Users\ferra\.jdks\corretto-21.0.4\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files (x86)\Common Files\Oracle\Java\java8path;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files\nodejs;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Users\ferra\.jdks\corretto-21.0.4\bin;C:\Program Files\Docker\Docker\resources\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\swipl\bin;C:\Program Files\dotnet\;C:\Program Files\Git\cmd;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\ProgramData\chocolatey\lib\maven\apache-maven-3.9.16\bin;C:\Users\ferra\AppData\Local\Programs\Python\Launcher\;C:\Users\ferra\AppData\Local\Microsoft\WindowsApps;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2025.1\bin;;C:\Users\ferra\AppData\Local\GitHubDesktop\bin;C:\Users\ferra\Downloads\p16as_v1.4.0;C:\Users\ferra\AppData\Roaming\npm;C:\Program Files\JetBrains\IntelliJ IDEA 2024.2.1\bin;;C:\Users\ferra\AppData\Local\Muse Hub\lib;C:\Users\ferra\AppData\Local\Programs\Microsoft VS Code\bin;."/>
     <property name="java.vm.info" value="mixed mode, sharing"/>
-    <property name="stderr.encoding" value="UTF-8"/>
-    <property name="java.vendor" value="Eclipse Adoptium"/>
-    <property name="java.vm.version" value="21.0.6+7-LTS"/>
-    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
-    <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="stderr.encoding" value="Cp1252"/>
+    <property name="java.vendor" value="Amazon.com Inc."/>
+    <property name="java.vm.version" value="21.0.4+7-LTS"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="testApp" classname="isel.sisinf.AppTest" time="0.001"/>
+  <testcase name="testApp" classname="isel.sisinf.AppTest" time="0.002"/>
 </testsuite>

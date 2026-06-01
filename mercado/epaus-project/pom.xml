@@ -22,8 +22,8 @@
     </dependency>
   </dependencies>
   <modules>
-    <module>dal</module>
     <module>model</module>
+    <module>dal</module>
     <module>app</module>
   </modules>
   <build>
