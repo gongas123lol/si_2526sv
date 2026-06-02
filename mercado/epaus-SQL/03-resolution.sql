@@ -17,26 +17,9 @@
 -- region Question 1.a 
 CREATE OR REPLACE FUNCTION fn_validate_nif()
 RETURNS TRIGGER AS $$
-DECLARE
-    digits TEXT := NEW.nif;
-    total INTEGER := 0;
-    expected INTEGER;
 BEGIN
-    IF digits !~ '^[0-9]{9}$' THEN
+    IF NEW.nif !~ '^[0-9]{9}$' THEN
         RAISE EXCEPTION 'NIF % must have exactly 9 digits', NEW.nif;
-    END IF;
-
-    FOR i IN 1..8 LOOP
-        total := total + substring(digits FROM i FOR 1)::INTEGER * (10 - i);
-    END LOOP;
-
-    expected := 11 - (total % 11);
-    IF expected >= 10 THEN
-        expected := 0;
-    END IF;
-
-    IF expected <> substring(digits FROM 9 FOR 1)::INTEGER THEN
-        RAISE EXCEPTION 'Invalid NIF %', NEW.nif;
     END IF;
 
     RETURN NEW;
@@ -57,7 +40,7 @@ BEGIN
         FROM contacto_email ce
         WHERE ce.cliente_nif = NEW.cliente_nif
           AND lower(ce.email) = lower(NEW.email)
-          AND ce.contacto_email_id <> COALESCE(NEW.contacto_email_id, -1)
+          AND (TG_OP = 'INSERT' OR ce.contacto_email_id <> NEW.contacto_email_id)
     ) THEN
         RAISE EXCEPTION 'Duplicate email contact % for client %', NEW.email, NEW.cliente_nif;
     END IF;
@@ -74,7 +57,7 @@ BEGIN
         FROM contacto_telefone ct
         WHERE ct.cliente_nif = NEW.cliente_nif
           AND ct.telefone = NEW.telefone
-          AND ct.contacto_telefone_id <> COALESCE(NEW.contacto_telefone_id, -1)
+          AND (TG_OP = 'INSERT' OR ct.contacto_telefone_id <> NEW.contacto_telefone_id)
     ) THEN
         RAISE EXCEPTION 'Duplicate phone contact % for client %', NEW.telefone, NEW.cliente_nif;
     END IF;
@@ -96,23 +79,23 @@ FOR EACH ROW EXECUTE FUNCTION fn_validate_unique_phone_contact();
 CREATE OR REPLACE FUNCTION fx_media_movel(p_days INTEGER, p_instrumento_isin VARCHAR(12))
 RETURNS NUMERIC(15,2) AS $$
 DECLARE
-    result NUMERIC(15,2);
+    media NUMERIC(15,2);
 BEGIN
-    IF p_days IS NULL OR p_days <= 0 THEN
+    IF p_days <= 0 THEN
         RAISE EXCEPTION 'Number of days must be positive';
     END IF;
 
     SELECT ROUND(AVG(valor_fecho), 2)
-    INTO result
+    INTO media
     FROM (
         SELECT valor_fecho
         FROM valor_instrumento_diario
         WHERE instrumento_isin = p_instrumento_isin
         ORDER BY data DESC
         LIMIT p_days
-    ) recent_values;
+    ) ultimos_dias;
 
-    RETURN result;
+    RETURN media;
 END;
 $$ LANGUAGE plpgsql;
 -- endregion
@@ -132,26 +115,29 @@ BEGIN
         p.quantidade,
         df.valor_actual,
         COALESCE(
-            ROUND(((latest.valor_fecho - previous.valor_fecho) / NULLIF(previous.valor_fecho, 0)) * 100, 2),
+            ROUND(
+                ((ultimo.valor_fecho - anterior.valor_fecho) / NULLIF(anterior.valor_fecho, 0)) * 100,
+                2
+            ),
             df.percentagem_variacao_diaria
         )::NUMERIC(7,2) AS percentagem_variacao_diaria
     FROM posicao p
     JOIN dados_fundamentais df ON df.instrumento_isin = p.instrumento_isin
-    LEFT JOIN LATERAL (
-        SELECT vid.valor_fecho, vid.data
-        FROM valor_instrumento_diario vid
-        WHERE vid.instrumento_isin = p.instrumento_isin
-        ORDER BY vid.data DESC
-        LIMIT 1
-    ) latest ON TRUE
-    LEFT JOIN LATERAL (
-        SELECT vid.valor_fecho
-        FROM valor_instrumento_diario vid
-        WHERE vid.instrumento_isin = p.instrumento_isin
-          AND vid.data < latest.data
-        ORDER BY vid.data DESC
-        LIMIT 1
-    ) previous ON TRUE
+    LEFT JOIN valor_instrumento_diario ultimo
+      ON ultimo.instrumento_isin = p.instrumento_isin
+     AND ultimo.data = (
+         SELECT MAX(data)
+         FROM valor_instrumento_diario
+         WHERE instrumento_isin = p.instrumento_isin
+     )
+    LEFT JOIN valor_instrumento_diario anterior
+      ON anterior.instrumento_isin = p.instrumento_isin
+     AND anterior.data = (
+         SELECT MAX(data)
+         FROM valor_instrumento_diario
+         WHERE instrumento_isin = p.instrumento_isin
+           AND data < ultimo.data
+     )
     WHERE p.portefolio = p_portefolio_id;
 END;
 $$ LANGUAGE plpgsql;
