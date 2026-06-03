@@ -14,82 +14,74 @@
  * ### */
 
 
--- region Question 1.a 
-CREATE OR REPLACE FUNCTION fn_validate_nif()
+-- region Question 1.a
+CREATE OR REPLACE FUNCTION fun_trigger_1a
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.nif !~ '^[0-9]{9}$' THEN
-        RAISE EXCEPTION 'NIF % must have exactly 9 digits', NEW.nif;
+    IF length(new.nif) <> 9:
+        RAISE EXCEPTION 'NIF invalido, nao tem 9 digitos';
     END IF;
+    --bloco try catch a dar cast para bigint
+    BEGIN
+        PERFORM new.nif::BIGINT;
+    EXCEPTION
+        RAISE EXCEPTION 'NIF invalido, contem letras';
 
     RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+$$
+LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER trg_validate_nif
+CREATE OR REPLACE TRIGGER trigger_1a
 BEFORE INSERT OR UPDATE OF nif ON cliente
-FOR EACH ROW EXECUTE FUNCTION fn_validate_nif();
+FOR EACH ROW EXECUTE FUNCTION fun_trigger_1a();
 -- endregion
 
 -- region Question 1.b
-CREATE OR REPLACE FUNCTION fn_validate_unique_email_contact()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION fun_trigger_1b_email
+RETURNS TRIGGER as $$
 BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM contacto_email ce
-        WHERE ce.cliente_nif = NEW.cliente_nif
-          AND lower(ce.email) = lower(NEW.email)
-          AND (TG_OP = 'INSERT' OR ce.contacto_email_id <> NEW.contacto_email_id)
+    IF EXISTS(
+        SELECT * FROM contacto_email
+         WHERE contacto_email.cliente_nif == new.cliente_nif AND
+          contacto_email.email <> new.email
     ) THEN
-        RAISE EXCEPTION 'Duplicate email contact % for client %', NEW.email, NEW.cliente_nif;
-    END IF;
+        RAISE EXCEPTION 'já existe um contacto igual associado a este user';
+        END IF;
 
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION fn_validate_unique_phone_contact()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION fun_trigger_1b_telefone
+RETURNS TRIGGER as $$
 BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM contacto_telefone ct
-        WHERE ct.cliente_nif = NEW.cliente_nif
-          AND ct.telefone = NEW.telefone
-          AND (TG_OP = 'INSERT' OR ct.contacto_telefone_id <> NEW.contacto_telefone_id)
+    IF EXISTS(
+        SELECT * FROM contacto_telefone
+         WHERE contacto_telefone.cliente_nif == new.cliente_nif AND
+          contacto_telefone.telefone <> new.telefone
     ) THEN
-        RAISE EXCEPTION 'Duplicate phone contact % for client %', NEW.telefone, NEW.cliente_nif;
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE TRIGGER trg_unique_email_contact
+        RAISE EXCEPTION 'já existe um contacto igual associado a este user';
+        END IF;
+    
+CREATE OR REPLACE TRIGGER trigger_1b_email
 BEFORE INSERT OR UPDATE ON contacto_email
-FOR EACH ROW EXECUTE FUNCTION fn_validate_unique_email_contact();
+FOR EACH ROW EXECUTE FUNCTION fun_trigger_1b_email();
 
-CREATE OR REPLACE TRIGGER trg_unique_phone_contact
+CREATE OR REPLACE TRIGGER trigger_1b_telefone
 BEFORE INSERT OR UPDATE ON contacto_telefone
-FOR EACH ROW EXECUTE FUNCTION fn_validate_unique_phone_contact();
+FOR EACH ROW EXECUTE FUNCTION fun_trigger_1b_telefone();
 -- endregion
 
 -- region Question 2
 CREATE OR REPLACE FUNCTION fx_media_movel(p_days INTEGER, p_instrumento_isin VARCHAR(12))
-RETURNS NUMERIC(15,2) AS $$
+RETURNS NUMERIC(10,2) AS $$
 DECLARE
-    media NUMERIC(15,2);
+    media NUMERIC(10,2);
 BEGIN
     IF p_days <= 0 THEN
-        RAISE EXCEPTION 'Number of days must be positive';
+        RAISE EXCEPTION 'dias não podem ter valores negativos';
     END IF;
 
     SELECT ROUND(AVG(valor_fecho), 2)
     INTO media
     FROM (
-        SELECT valor_fecho
-        FROM valor_instrumento_diario
+        SELECT valor_fecho FROM valor_instrumento_diario
         WHERE instrumento_isin = p_instrumento_isin
         ORDER BY data DESC
         LIMIT p_days
@@ -103,47 +95,62 @@ $$ LANGUAGE plpgsql;
 -- region Question 3
 CREATE OR REPLACE FUNCTION fx_portefolio_info(p_portefolio_id BIGINT)
 RETURNS TABLE (
-    instrumento_isin VARCHAR(12),
-    quantidade NUMERIC(15,4),
-    valor_actual NUMERIC(15,2),
+    instrumento_isin            VARCHAR(12),
+    quantidade                  NUMERIC(15,4),
+    valor_actual                NUMERIC(15,2),
     percentagem_variacao_diaria NUMERIC(7,2)
-) AS $$
+)
+AS $$
+DECLARE
+    pos        RECORD;
+    v_atual    NUMERIC(15,2);
+    v_hoje     NUMERIC(15,2);
+    v_ontem    NUMERIC(15,2);
+    v_variacao NUMERIC(7,2);
 BEGIN
-    RETURN QUERY
-    SELECT
-        p.instrumento_isin,
-        p.quantidade,
-        df.valor_actual,
-        COALESCE(
-            ROUND(
-                ((ultimo.valor_fecho - anterior.valor_fecho) / NULLIF(anterior.valor_fecho, 0)) * 100,
-                2
-            ),
-            df.percentagem_variacao_diaria
-        )::NUMERIC(7,2) AS percentagem_variacao_diaria
-    FROM posicao p
-    JOIN dados_fundamentais df ON df.instrumento_isin = p.instrumento_isin
-    LEFT JOIN valor_instrumento_diario ultimo
-      ON ultimo.instrumento_isin = p.instrumento_isin
-     AND ultimo.data = (
-         SELECT MAX(data)
-         FROM valor_instrumento_diario
-         WHERE instrumento_isin = p.instrumento_isin
-     )
-    LEFT JOIN valor_instrumento_diario anterior
-      ON anterior.instrumento_isin = p.instrumento_isin
-     AND anterior.data = (
-         SELECT MAX(data)
-         FROM valor_instrumento_diario
-         WHERE instrumento_isin = p.instrumento_isin
-           AND data < ultimo.data
-     )
-    WHERE p.portefolio = p_portefolio_id;
+    FOR pos IN
+        SELECT p.instrumento_isin, p.quantidade
+        FROM posicao p
+        WHERE p.portefolio = p_portefolio_id
+    LOOP
+        SELECT df.valor_actual INTO v_atual
+        FROM dados_fundamentais df
+        WHERE df.instrumento_isin = pos.instrumento_isin;
+
+        SELECT vid.valor_fecho INTO v_hoje
+        FROM valor_instrumento_diario vid
+        WHERE vid.instrumento_isin = pos.instrumento_isin
+        ORDER BY vid.data DESC
+        LIMIT 1;
+
+        SELECT vid.valor_fecho INTO v_ontem
+        FROM valor_instrumento_diario vid
+        WHERE vid.instrumento_isin = pos.instrumento_isin
+          AND vid.data < (
+              SELECT MAX(data)
+              FROM valor_instrumento_diario
+              WHERE instrumento_isin = pos.instrumento_isin
+          )
+        ORDER BY vid.data DESC
+        LIMIT 1;
+
+        IF v_ontem IS NOT NULL AND v_ontem <> 0 THEN
+            SELECT ROUND(((v_hoje - v_ontem) / v_ontem) * 100, 2) INTO v_variacao;
+        ELSE
+            SELECT df.percentagem_variacao_diaria INTO v_variacao
+            FROM dados_fundamentais df
+            WHERE df.instrumento_isin = pos.instrumento_isin;
+        END IF;
+
+        SELECT pos.instrumento_isin, pos.quantidade, v_atual, v_variacao
+        INTO instrumento_isin, quantidade, valor_actual, percentagem_variacao_diaria;
+
+        RETURN NEXT;
+    END LOOP;
 END;
 $$ LANGUAGE plpgsql;
 -- endregion
- 
--- region Question 4
+ -- region Question 4
 CREATE OR REPLACE PROCEDURE p_actualizaValorDiario()
 LANGUAGE plpgsql
 AS $$
@@ -218,159 +225,13 @@ BEGIN
 END;
 $$;
 -- endregion
-
 -- region Question 5
 CREATE OR REPLACE VIEW contacto_cliente(nif,carta_cidadao,nome,tipo_contacto,contacto,descricao)
 AS
-SELECT c.nif,
-       c.cartao_cidadao,
-       c.nome,
-       'email'::VARCHAR(10) AS tipo_contacto,
-       ce.email AS contacto,
-       ce.descricao
-FROM cliente c
-JOIN contacto_email ce ON ce.cliente_nif = c.nif
-UNION ALL
-SELECT c.nif,
-       c.cartao_cidadao,
-       c.nome,
-       'telefone'::VARCHAR(10) AS tipo_contacto,
-       ct.telefone AS contacto,
-       ct.descricao
-FROM cliente c
-JOIN contacto_telefone ct ON ct.cliente_nif = c.nif;
-
-CREATE OR REPLACE FUNCTION fn_contacto_cliente_insert()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO cliente (nif, cartao_cidadao, nome)
-    VALUES (NEW.nif, NEW.carta_cidadao, NEW.nome)
-    ON CONFLICT (nif) DO UPDATE
-    SET cartao_cidadao = EXCLUDED.cartao_cidadao,
-        nome = EXCLUDED.nome;
-
-    IF lower(NEW.tipo_contacto) = 'email' THEN
-        INSERT INTO contacto_email (cliente_nif, descricao, email)
-        VALUES (NEW.nif, NEW.descricao, NEW.contacto);
-    ELSIF lower(NEW.tipo_contacto) IN ('telefone', 'phone') THEN
-        INSERT INTO contacto_telefone (cliente_nif, descricao, telefone)
-        VALUES (NEW.nif, NEW.descricao, NEW.contacto);
-    ELSE
-        RAISE EXCEPTION 'Unknown contact type %', NEW.tipo_contacto;
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION fn_contacto_cliente_update()
-RETURNS TRIGGER AS $$
-BEGIN
-    UPDATE cliente
-    SET nif = NEW.nif,
-        cartao_cidadao = NEW.carta_cidadao,
-        nome = NEW.nome
-    WHERE nif = OLD.nif;
-
-    IF lower(OLD.tipo_contacto) = 'email' THEN
-        UPDATE contacto_email
-        SET cliente_nif = NEW.nif,
-            descricao = NEW.descricao,
-            email = NEW.contacto
-        WHERE cliente_nif = OLD.nif
-          AND email = OLD.contacto
-          AND descricao = OLD.descricao;
-    ELSIF lower(OLD.tipo_contacto) = 'telefone' THEN
-        UPDATE contacto_telefone
-        SET cliente_nif = NEW.nif,
-            descricao = NEW.descricao,
-            telefone = NEW.contacto
-        WHERE cliente_nif = OLD.nif
-          AND telefone = OLD.contacto
-          AND descricao = OLD.descricao;
-    ELSE
-        RAISE EXCEPTION 'Unknown contact type %', OLD.tipo_contacto;
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE TRIGGER trg_contacto_cliente_insert
-INSTEAD OF INSERT ON contacto_cliente
-FOR EACH ROW EXECUTE FUNCTION fn_contacto_cliente_insert();
-
-CREATE OR REPLACE TRIGGER trg_contacto_cliente_update
-INSTEAD OF UPDATE ON contacto_cliente
-FOR EACH ROW EXECUTE FUNCTION fn_contacto_cliente_update();
+--TODO
 -- endregion
 
 -- region Other changes
-ALTER TABLE cliente
-ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 0;
-
-CREATE OR REPLACE FUNCTION fn_refresh_valor_mercado(p_mercado VARCHAR(20), p_data DATE)
-RETURNS VOID AS $$
-DECLARE
-    current_index NUMERIC(15,2);
-    opening_index NUMERIC(15,2);
-BEGIN
-    SELECT ROUND(SUM(vid.valor_abertura), 2)
-    INTO current_index
-    FROM instrumento i
-    JOIN valor_instrumento_diario vid ON vid.instrumento_isin = i.instrumento_id
-    WHERE i.mercado = p_mercado
-      AND vid.data = p_data;
-
-    IF current_index IS NULL THEN
-        DELETE FROM valor_mercado_diario
-        WHERE mercado = p_mercado AND data = p_data;
-        RETURN;
-    END IF;
-
-    SELECT vmd.valor_indice
-    INTO opening_index
-    FROM valor_mercado_diario vmd
-    WHERE vmd.mercado = p_mercado
-      AND vmd.data < p_data
-    ORDER BY vmd.data DESC
-    LIMIT 1;
-
-    opening_index := COALESCE(opening_index, current_index);
-
-    INSERT INTO valor_mercado_diario (mercado, data, valor_indice, valor_abertura, variacao_diaria)
-    VALUES (p_mercado, p_data, current_index, opening_index, ROUND(current_index - opening_index, 2))
-    ON CONFLICT (mercado, data) DO UPDATE
-    SET valor_indice = EXCLUDED.valor_indice,
-        valor_abertura = EXCLUDED.valor_abertura,
-        variacao_diaria = EXCLUDED.variacao_diaria;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION fn_refresh_valor_mercado_trigger()
-RETURNS TRIGGER AS $$
-DECLARE
-    market_id VARCHAR(20);
-BEGIN
-    IF TG_OP IN ('INSERT', 'UPDATE') THEN
-        SELECT mercado INTO market_id
-        FROM instrumento
-        WHERE instrumento_id = NEW.instrumento_isin;
-        PERFORM fn_refresh_valor_mercado(market_id, NEW.data);
-    END IF;
-
-    IF TG_OP IN ('UPDATE', 'DELETE') THEN
-        SELECT mercado INTO market_id
-        FROM instrumento
-        WHERE instrumento_id = OLD.instrumento_isin;
-        PERFORM fn_refresh_valor_mercado(market_id, OLD.data);
-    END IF;
-
-    RETURN COALESCE(NEW, OLD);
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE TRIGGER trg_refresh_valor_mercado
-AFTER INSERT OR UPDATE OR DELETE ON valor_instrumento_diario
-FOR EACH ROW EXECUTE FUNCTION fn_refresh_valor_mercado_trigger();
+--TODO
 -- endregion
+
