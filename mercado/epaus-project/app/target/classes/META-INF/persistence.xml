@@ -6,6 +6,7 @@
   <persistence-unit name="projectSI" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>isel.sisinf.model.Cliente</class>
+    <class>isel.sisinf.model.Portefolio</class>
     <properties>
       <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
       <property name="eclipselink.logging.level" value="WARNING"/>

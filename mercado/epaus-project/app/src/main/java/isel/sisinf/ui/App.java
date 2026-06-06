@@ -276,10 +276,14 @@ class UI implements AutoCloseable
             System.out.printf("Cartao de cidadao actual [%s]: ", cliente.getCartaoCidadao());
             String citizenCard = readOptionalLine(s);
 
-            dal.updateClient(
-                    nif,
-                    citizenCard.isBlank() ? cliente.getCartaoCidadao() : citizenCard,
-                    name.isBlank() ? cliente.getNome() : name);
+            if (name.isBlank()) {
+                name = cliente.getNome();
+            }
+            if (citizenCard.isBlank()) {
+                citizenCard = cliente.getCartaoCidadao();
+            }
+
+            dal.updateClient(nif, citizenCard, name);
             System.out.println("Cliente actualizado com sucesso.");
         } catch (IllegalStateException ex) {
             System.out.println(ex.getMessage());

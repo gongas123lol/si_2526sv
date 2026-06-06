@@ -24,6 +24,7 @@ SOFTWARE.
 package isel.sisinf.jpa;
 
 import isel.sisinf.model.Cliente;
+import isel.sisinf.model.Portefolio;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -33,6 +34,7 @@ import jakarta.persistence.Persistence;
 import jakarta.persistence.Query;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,16 +44,38 @@ public class Dal implements AutoCloseable
     private final EntityManagerFactory emf;
     private final EntityManager em;
 
-    public record PositionRow(
-            long portfolioId,
-            String portfolioName,
-            String isin,
-            BigDecimal quantity,
-            BigDecimal currentValue,
-            BigDecimal positionTotal,
-            BigDecimal portfolioTotal,
-            BigDecimal dailyVariationPercent
-    ) {
+    public static class PositionRow {
+        private final long portfolioId;
+        private final String portfolioName;
+        private final String isin;
+        private final BigDecimal quantity;
+        private final BigDecimal currentValue;
+        private final BigDecimal positionTotal;
+        private final BigDecimal portfolioTotal;
+        private final BigDecimal dailyVariationPercent;
+
+        public PositionRow(long portfolioId, String portfolioName, String isin,
+                           BigDecimal quantity, BigDecimal currentValue,
+                           BigDecimal positionTotal, BigDecimal portfolioTotal,
+                           BigDecimal dailyVariationPercent) {
+            this.portfolioId = portfolioId;
+            this.portfolioName = portfolioName;
+            this.isin = isin;
+            this.quantity = quantity;
+            this.currentValue = currentValue;
+            this.positionTotal = positionTotal;
+            this.portfolioTotal = portfolioTotal;
+            this.dailyVariationPercent = dailyVariationPercent;
+        }
+
+        public long portfolioId() { return portfolioId; }
+        public String portfolioName() { return portfolioName; }
+        public String isin() { return isin; }
+        public BigDecimal quantity() { return quantity; }
+        public BigDecimal currentValue() { return currentValue; }
+        public BigDecimal positionTotal() { return positionTotal; }
+        public BigDecimal portfolioTotal() { return portfolioTotal; }
+        public BigDecimal dailyVariationPercent() { return dailyVariationPercent; }
     }
 
     public Dal() {
@@ -71,11 +95,10 @@ public class Dal implements AutoCloseable
     public void createClientWithContact(String nif, String citizenCard, String name,
                                         String contactType, String contact, String description) {
         inTransaction(() -> {
-            Query query = em.createNativeQuery("""
-                    INSERT INTO contacto_cliente
-                    (nif, carta_cidadao, nome, tipo_contacto, contacto, descricao)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    """);
+            String sql = "INSERT INTO contacto_cliente " +
+                    "(nif, carta_cidadao, nome, tipo_contacto, contacto, descricao) " +
+                    "VALUES (?, ?, ?, ?, ?, ?)";
+            Query query = em.createNativeQuery(sql);
             query.setParameter(1, nif);
             query.setParameter(2, citizenCard);
             query.setParameter(3, name);
@@ -88,46 +111,50 @@ public class Dal implements AutoCloseable
 
     public void createPortfolio(String nif, String name) {
         inTransaction(() -> {
-            Query query = em.createNativeQuery("""
-                    INSERT INTO portefolio (cliente_nif, nome)
-                    VALUES (?, ?)
-                    """);
-            query.setParameter(1, nif);
-            query.setParameter(2, name);
-            query.executeUpdate();
+            Cliente cliente = em.find(Cliente.class, nif);
+            if (cliente == null) {
+                throw new IllegalArgumentException("Cliente inexistente: " + nif);
+            }
+
+            Portefolio portefolio = new Portefolio();
+            portefolio.setCliente(cliente);
+            portefolio.setNome(name);
+            em.persist(portefolio);
         });
     }
 
     public List<PositionRow> listPositionsByClient(String nif) {
+        String sql = "SELECT pf.portefolio_id, " +
+                "pf.nome, " +
+                "info.instrumento_isin, " +
+                "info.quantidade, " +
+                "info.valor_actual, " +
+                "ROUND(info.quantidade * info.valor_actual, 2) AS valor_posicao, " +
+                "pf.valor_total, " +
+                "info.percentagem_variacao_diaria " +
+                "FROM portefolio pf " +
+                "JOIN LATERAL fx_portefolio_info(pf.portefolio_id) info ON TRUE " +
+                "WHERE pf.cliente_nif = ? " +
+                "ORDER BY pf.portefolio_id, info.instrumento_isin";
+
         @SuppressWarnings("unchecked")
-        List<Object[]> rows = em.createNativeQuery("""
-                SELECT pf.portefolio_id,
-                       pf.nome,
-                       info.instrumento_isin,
-                       info.quantidade,
-                       info.valor_actual,
-                       ROUND(info.quantidade * info.valor_actual, 2) AS valor_posicao,
-                       pf.valor_total,
-                       info.percentagem_variacao_diaria
-                FROM portefolio pf
-                JOIN LATERAL fx_portefolio_info(pf.portefolio_id) info ON TRUE
-                WHERE pf.cliente_nif = ?
-                ORDER BY pf.portefolio_id, info.instrumento_isin
-                """)
+        List<Object[]> rows = em.createNativeQuery(sql)
                 .setParameter(1, nif)
                 .getResultList();
 
-        return rows.stream()
-                .map(row -> new PositionRow(
-                        ((Number) row[0]).longValue(),
-                        (String) row[1],
-                        (String) row[2],
-                        (BigDecimal) row[3],
-                        (BigDecimal) row[4],
-                        (BigDecimal) row[5],
-                        (BigDecimal) row[6],
-                        (BigDecimal) row[7]))
-                .toList();
+        List<PositionRow> result = new ArrayList<>();
+        for (Object[] row : rows) {
+            result.add(new PositionRow(
+                    ((Number) row[0]).longValue(),
+                    (String) row[1],
+                    (String) row[2],
+                    (BigDecimal) row[3],
+                    (BigDecimal) row[4],
+                    (BigDecimal) row[5],
+                    (BigDecimal) row[6],
+                    (BigDecimal) row[7]));
+        }
+        return result;
     }
 
     public void updateDailyValues() {
