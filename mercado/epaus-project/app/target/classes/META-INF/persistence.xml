@@ -7,6 +7,11 @@
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>isel.sisinf.model.Cliente</class>
     <class>isel.sisinf.model.Portefolio</class>
+    <class>isel.sisinf.model.Mercado</class>
+    <class>isel.sisinf.model.Instrumento</class>
+    <class>isel.sisinf.model.ContactoEmail</class>
+    <class>isel.sisinf.model.ContactoTelefone</class>
+    <class>isel.sisinf.model.Posicao</class>
     <properties>
       <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
       <property name="eclipselink.logging.level" value="WARNING"/>
